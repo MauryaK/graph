@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart.js with Limits and Shaded Regions</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <style>
+        #myChart {
+            max-width: 600px;
+            width: 100%;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myChart"></canvas>
+    <script>
+        const ctx = document.getElementById('myChart').getContext('2d');
+
+        // Data and limits
+        const minLimit = 30;
+        const maxLimit = 80;
+        const data = [5, 12, 20, 85, 95, 78, 30, 40, 15, 60];
+
+        // Create chart
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            options: {
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                if (value === minLimit || value === maxLimit) {
+                                    return `${value} (limit)`;
+                                }
+                                return value;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            minLimitLine: {
+                                type: 'line',
+                                yMin: minLimit,
+                                yMax: minLimit,
+                                borderColor: 'red',
+                                borderWidth: 0,
+                                label: {
+                                    content: `Min Limit (${minLimit})`,
+                                    enabled: true,
+                                    position: 'right'
+                                }
+                            },
+                            maxLimitLine: {
+                                type: 'line',
+                                yMin: maxLimit,
+                                yMax: maxLimit,
+                                borderColor: 'red',
+                                borderWidth: 0,
+                                label: {
+                                    content: `Max Limit (${maxLimit})`,
+                                    enabled: true,
+                                    position: 'right'
+                                }
+                            },
+                            shadedRegion: {
+                                type: 'box',
+                                yScaleID: 'y',
+                                xScaleID: 'x',
+                                yMin: minLimit,
+                                yMax: maxLimit,
+                                backgroundColor: '#00968869',
+                                borderColor: 'rgba(255, 0, 0, 0.5)',
+                                borderWidth: 0,
+                            }
+                        }
+                    }
+                }
+            },
+            
+            data: {
+                labels: data.map((_, index) => `Point ${index + 1}`),
+                datasets: [{
+                    label: 'Data',
+                    data: data,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 1,
+                    pointBackgroundColor: data.map(value => getColor(value)),
+                    pointBorderColor: data.map(value => getColor(value)),
+                    pointRadius: 5,
+                }]
+            },
+        });
+
+        // Helper function to determine color based on limit
+        function getColor(value) {
+            if (value < minLimit) {
+                return 'rgba(255, 0, 0, 0.5)'; // Red for below minimum
+            } else if (value > maxLimit) {
+                return 'rgba(255, 0, 0, 0.5)'; // Red for above maximum
+            } else {
+                return 'rgba(75, 192, 192, 0.2)'; // Default color
+            }
+        }
+    </script>
+</body>
+</html>
